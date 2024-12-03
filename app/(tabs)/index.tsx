@@ -1,23 +1,74 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { StyleSheet, Platform, View, TouchableOpacity } from 'react-native';
+
+import { Image } from 'expo-image';
 
 import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import MapView from 'react-native-maps';
+import { 
+  requestForegroundPermissionsAsync,
+  getCurrentPositionAsync,
+  LocationObject,
+  watchPositionAsync,
+  LocationAccuracy
+ } from 'expo-location';
+import { useEffect, useState } from 'react';
 
 export default function HomeScreen() {
+
+  const [location, setLocation] = useState<LocationObject | null>(null);
+
+  const requestLocationPermissions = async() => {
+    const { granted } = await requestForegroundPermissionsAsync();
+
+    if (granted) {
+      const currentPosition = await getCurrentPositionAsync();
+      setLocation(currentPosition);
+    }
+  }
+
+  useEffect(() => {
+    requestLocationPermissions()
+  }, [])
+
+  useEffect(() => {
+    watchPositionAsync({
+      accuracy: LocationAccuracy.Highest,
+      timeInterval: 1000,
+      distanceInterval: 1
+    }, (response) => {
+      setLocation(response);
+    })
+  }, [])
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
+    <View style={styles.container} >
+      <MapView
+        style={styles.map}
+        initialRegion={{
+          latitude: location?.coords.latitude || 0,
+          longitude: location?.coords.longitude || 0,
+          latitudeDelta: 0.005,
+          longitudeDelta: 0.005,
+        }}
+
+        showsUserLocation={true}
+        followsUserLocation={true}
+        showsMyLocationButton={true}
+        showsCompass={true}
+        >
+          <TouchableOpacity style={styles.button}>
+            <Image 
+              style={styles.image}
+              source={'../../assets/images/icon.png'} 
+            />
+          </TouchableOpacity>
+        </MapView>
+        
+      {/* <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
+        
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
         <ThemedText type="subtitle">Step 1: Try it</ThemedText>
@@ -49,12 +100,22 @@ export default function HomeScreen() {
           <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
           <ThemedText type="defaultSemiBold">app-example</ThemedText>.
         </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      </ThemedView> */}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  map: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -70,5 +131,20 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     position: 'absolute',
+  },
+  button: {
+    position: 'absolute',
+    bottom: 110, 
+    left: 300,
+    right: 20, 
+    backgroundColor: '#00A86B', 
+    padding: 10,
+    borderRadius: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  image: {
+    width: 50,
+    height: 50,
   },
 });
