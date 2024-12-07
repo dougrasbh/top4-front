@@ -1,10 +1,9 @@
-import { StyleSheet, Platform, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import { RFValue } from "react-native-responsive-fontsize"
+import { useNavigation } from 'expo-router';
 
 import { Image } from 'expo-image';
 
-import { HelloWave } from '@/components/HelloWave';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
 import MapView from 'react-native-maps';
 import { 
   requestForegroundPermissionsAsync,
@@ -15,9 +14,13 @@ import {
  } from 'expo-location';
 import { useEffect, useState } from 'react';
 
+import CameraLogo from '../../assets/images/camera-logo.png'
+
 export default function HomeScreen() {
 
   const [location, setLocation] = useState<LocationObject | null>(null);
+
+  const navigation = useNavigation()
 
   const requestLocationPermissions = async() => {
     const { granted } = await requestForegroundPermissionsAsync();
@@ -44,63 +47,33 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container} >
-      <MapView
-        style={styles.map}
-        initialRegion={{
-          latitude: location?.coords.latitude || 0,
-          longitude: location?.coords.longitude || 0,
-          latitudeDelta: 0.005,
-          longitudeDelta: 0.005,
-        }}
 
-        showsUserLocation={true}
-        followsUserLocation={true}
-        showsMyLocationButton={true}
-        showsCompass={true}
-        >
-          <TouchableOpacity style={styles.button}>
+      {location && (
+         <MapView
+         style={styles.map}
+         initialRegion={{
+           latitude: location.coords.latitude,
+           longitude: location.coords.longitude,
+           latitudeDelta: 0.005,
+           longitudeDelta: 0.005,
+         }}
+ 
+         showsUserLocation={true}
+         showsMyLocationButton={true}
+         showsCompass={true}
+       />
+      )}
+     
+      
+        {/* <View style={styles.footer}>
+          <TouchableOpacity style={styles.button} activeOpacity={0.7} onPress={() => navigation.navigate('camera')} >
             <Image 
               style={styles.image}
-              source={'../../assets/images/icon.png'} 
+              source={CameraLogo} 
             />
           </TouchableOpacity>
-        </MapView>
+        </View> */}
         
-      {/* <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView> */}
     </View>
   );
 }
@@ -113,38 +86,45 @@ const styles = StyleSheet.create({
   },
   map: {
     flex: 1,
-    width: '100%',
-    height: '100%',
+    ...StyleSheet.absoluteFillObject,
   },
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
   button: {
-    position: 'absolute',
-    bottom: 110, 
-    left: 300,
-    right: 20, 
-    backgroundColor: '#00A86B', 
-    padding: 10,
-    borderRadius: 100,
-    alignItems: 'center',
+    width: RFValue(60),
+    height: RFValue(60),
+    backgroundColor: '#00A86B',
+    borderRadius: RFValue(100),
     justifyContent: 'center',
+    alignItems: 'center',
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    marginTop: RFValue(450),
+    padding: RFValue(20), 
+    backgroundColor: 'transparent', 
   },
   image: {
-    width: 50,
-    height: 50,
+    width: RFValue(30),
+    height: RFValue(30),
+  },
+  camera: {
+    flex: 1,
+  },
+  buttonContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    backgroundColor: 'transparent',
+    margin: 64,
+  },
+  text: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
   },
 });
