@@ -7,6 +7,7 @@ import BryophtaExample from "../assets/images/bryophta-example.png"
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
+import { useNavigation, Link } from "expo-router";
 
 interface HistoricalCardProps {
   image?: string;
@@ -18,6 +19,8 @@ export function HistoricalCard({ image, bryophtaName, date }: HistoricalCardProp
 
   const colorScheme = useColorScheme();
   const color = (Colors[colorScheme ?? 'light'].icon)
+
+  const navigate = useNavigation();
 
   return(
     <ThemedView style={styles.container}>
@@ -39,8 +42,10 @@ export function HistoricalCard({ image, bryophtaName, date }: HistoricalCardProp
         <ThemedText style={styles.bryophtaName} >{formatDate(date)}</ThemedText>
       </View>
       <View>
-        <TouchableOpacity style={styles.button}>
-          <AntDesign name="rightcircle" size={25} color={color} />
+        <TouchableOpacity style={styles.button} activeOpacity={0.7} >
+          <Link href={`/modal?id=1`}>
+            <AntDesign name="rightcircle" size={25} color={color} />
+          </Link>
         </TouchableOpacity>
       </View>
     </ThemedView>
