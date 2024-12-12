@@ -1,30 +1,50 @@
-import { View, Image, Platform, StyleSheet, Linking, TouchableOpacity } from "react-native";
-import BryophtaExample from "../assets/images/bryophta-example.png"
+import { View, Image, Platform, StyleSheet, Linking, TouchableOpacity, ActivityIndicator } from "react-native";
+import BryophtaExample from "../assets/images/musgoExemplo.jpg"
 import { RFValue } from "react-native-responsive-fontsize";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
-import { Link, useLocalSearchParams, router } from 'expo-router';
+import { Link, useLocalSearchParams } from 'expo-router';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { formatDate } from "./utils/formatDate";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { convertToDMS } from "./utils/convertToDMS";
 
-interface Props {
-  image?: any;
-  bryophtaName: string;
-  date: Date;
-  location: string;
+interface Data {
+  category: number;
   points: number;
+  latitude: number;
+  longitude: number;
+  imageBytes: string;
+  creationTime: string;
 }
 
-export default function VisualizeBryophta({ image, bryophtaName, date, location, points }: Props) {
+export default function VisualizeBryophta() {
 
   const { id } = useLocalSearchParams();
 
-  console.log(id)
+  const [data, setData] = useState<Data>();
+  const [isLoading, setIsLoading] = useState(true);
 
-  function openMap(latitude: number = -3.03, longitude: number = -60.01) {
+  const getData = async () => {
+    try {
+      const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/Prediction/${id}`)
+      setData(response.data)
+    } catch (e) {
+      console.error('Erro ao ler os dados:', e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getData();
+  }, []);
+
+  function openMap(latitude: number, longitude: number) {
     const location = `${latitude},${longitude}`
     const url = Platform.select({
       ios: `googleMaps://?center=${latitude},${longitude}&q=${latitude},${longitude}&zoom=14&views=traffic`,
@@ -33,20 +53,28 @@ export default function VisualizeBryophta({ image, bryophtaName, date, location,
     Linking.openURL(url);
   }
 
+  if (isLoading) {
+    return (
+      <ThemedView style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#00A86B"  />
+      </ThemedView>
+    );
+  }
+
   return(
     <ThemedView style={styles.container}>
       <ThemedText 
           type="defaultSemiBold" 
           numberOfLines={3}
           ellipsizeMode="tail"  
-          style={styles.bryophtaName}
+          style={styles.bryophtaName} 
         >
-          Syrrhopodon ligulatus
+          {data?.category == 3 ? "Musgo" : data?.category == 2 ? "Hepática" : "Antócero"}
         </ThemedText>
       <View>
         <Image 
           style={styles.image}
-          source={BryophtaExample} 
+          source={{ uri: `data:image/jpeg;base64,${data?.imageBytes}` }}
         />
       </View>
       <ThemedView style={styles.infoContainer} >
@@ -54,25 +82,23 @@ export default function VisualizeBryophta({ image, bryophtaName, date, location,
         <View style={styles.circle}>
           <MaterialCommunityIcons name="calendar-clock-outline" size={30} color="white" />
         </View>
-        <ThemedText style={styles.cardInfo}>{formatDate(new Date())}</ThemedText>
+        <ThemedText style={styles.cardInfo}>{formatDate(data?.creationTime ? new Date(data?.creationTime) : new Date())}</ThemedText>
        </ThemedView>
 
        <ThemedView style={styles.card} lightColor='#FAFAFA' darkColor="#1a1a1a">
-        <TouchableOpacity style={styles.buttonMap}  onPress={() => openMap()}>
+        <TouchableOpacity style={styles.buttonMap}  onPress={() => openMap(data?.latitude || 0, data?.longitude || 0)}>
           <View style={styles.circle}>
             <Ionicons name="location-outline" size={30} color="white"/>
           </View>
-          <ThemedText style={styles.locationInfo}>3.03° S, 60.01° W</ThemedText>
+          <ThemedText style={styles.locationInfo}>{convertToDMS(data?.latitude || 0, data?.longitude || 0)}</ThemedText>
         </TouchableOpacity>
        </ThemedView>
-
        <ThemedView style={styles.card} lightColor='#FAFAFA' darkColor="#1a1a1a">
         <View style={styles.circle}>
           <AntDesign name="Trophy" size={30} color="white" />
         </View>
-        <ThemedText style={styles.cardInfo}>10 pontos</ThemedText>
+        <ThemedText style={styles.cardInfo}>{data?.points} pontos</ThemedText>
        </ThemedView>
-
       </ThemedView>
 
       <TouchableOpacity activeOpacity={0.7} onPress={() => {}}>
@@ -90,6 +116,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'column',
     width: '100%',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   image: {
     width: wp('80%'),

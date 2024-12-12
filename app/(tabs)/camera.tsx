@@ -1,14 +1,14 @@
-import { StyleSheet, Platform, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, Platform, TouchableOpacity } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { useEffect, useRef } from 'react';
-import { useNavigation, useRouter } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as FileSystem from 'expo-file-system';
 import axios from 'axios';
 import Foundation from '@expo/vector-icons/Foundation';
-import { BlurView } from 'expo-blur';
 import { RFValue } from 'react-native-responsive-fontsize';
+import { getCurrentPositionAsync, LocationAccuracy, LocationObject, requestForegroundPermissionsAsync, watchPositionAsync } from 'expo-location';
 
 export default function CameraPage() {
 
@@ -20,6 +20,32 @@ export default function CameraPage() {
       return;
     }
   }
+
+  const [location, setLocation] = useState<LocationObject | null>(null);
+  
+    const requestLocationPermissions = async() => {
+      const { granted } = await requestForegroundPermissionsAsync();
+  
+      if (granted) {
+        const currentPosition = await getCurrentPositionAsync();
+        setLocation(currentPosition);
+      }
+    }
+  
+    useEffect(() => {
+      requestLocationPermissions()
+    }, [])
+  
+    useEffect(() => {
+      watchPositionAsync({
+        accuracy: LocationAccuracy.Highest,
+        timeInterval: 1000,
+        distanceInterval: 1
+      }, (response) => {
+        setLocation(response);
+      })
+    }, [])
+  
 
   const cameraRef = useRef<CameraView>(null);
   const router = useRouter();
@@ -33,7 +59,7 @@ export default function CameraPage() {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
         allowsEditing: true,
-        aspect: [4, 3],
+        aspect: [21, 9],
         quality: 1,
       });
 
@@ -66,32 +92,17 @@ export default function CameraPage() {
         .post(`${process.env.EXPO_PUBLIC_API_URL}/Prediction/RequestPrediction`, {
           imageBytesInBase64: byteArray,
           userId: 1,
+          latitude: location?.coords.latitude,
+          longitude: location?.coords.longitude,
         })
-        .then(() => router.navigate('/success'))
+        .then(async(response) => {
+          router.navigate(`/success?id=${response.data.id}`)
+        })
         .catch((error) => {
           router.navigate('/error');
-          console.log(JSON.stringify(error));
         });
     }
   };
-  
-
-  const pickImageFromGallery = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      // setPhotoUri(result.assets[0].uri);
-      // setFilename(result.assets[0].fileName!);
-
-      console.log(result.assets[0].uri)
-      console.log(result.assets[0].fileName)
-    }
-  };
-
-  const navigation = useNavigation()
 
   useEffect(() => {
     requestCameraPermissions();
@@ -104,8 +115,6 @@ export default function CameraPage() {
         <Foundation name="photo" size={35} color="white" />
       </TouchableOpacity>
     </CameraView>
-
-
   );
 }
 

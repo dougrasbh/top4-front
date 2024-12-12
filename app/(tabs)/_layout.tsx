@@ -62,14 +62,21 @@ export default function TabLayout() {
             fontSize: 20,
             fontWeight: 'bold', 
           },
-          
         }}
       />
       <Tabs.Screen
         name="points"
         options={{
           title: 'Pontos',
+          headerShown: true,
           tabBarIcon: ({ color }) => <AntDesign name="Trophy" size={ICONS_SIZE} color={color} />,
+          headerStyle: {
+            height: 110
+          },
+          headerTitleStyle: {
+            fontSize: 20,
+            fontWeight: 'bold', 
+          },
         }}
       />
       <Tabs.Screen

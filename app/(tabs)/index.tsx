@@ -1,10 +1,7 @@
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Image, ActivityIndicator } from 'react-native';
 import { RFValue } from "react-native-responsive-fontsize"
-import { useNavigation } from 'expo-router';
 
-import { Image } from 'expo-image';
-
-import MapView from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 import { 
   requestForegroundPermissionsAsync,
   getCurrentPositionAsync,
@@ -12,15 +9,17 @@ import {
   watchPositionAsync,
   LocationAccuracy
  } from 'expo-location';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
-import CameraLogo from '../../assets/images/camera-logo.png'
+import img from '../../assets/images/bryophta-example.png'
+import { useRouter } from 'expo-router';
+import axios from 'axios';
+import { ThemedView } from '@/components/ThemedView';
+import { ThemedText } from '@/components/ThemedText';
 
 export default function HomeScreen() {
 
   const [location, setLocation] = useState<LocationObject | null>(null);
-
-  const navigation = useNavigation()
 
   const requestLocationPermissions = async() => {
     const { granted } = await requestForegroundPermissionsAsync();
@@ -45,6 +44,44 @@ export default function HomeScreen() {
     })
   }, [])
 
+  const router = useRouter();
+
+  const [images, setImages] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    getData();
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  }, []);
+
+  const getData = async () => {
+    try {
+      const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/Prediction/Get/1`)
+      setImages(response.data)
+    } catch (e) {
+      console.error('Erro ao ler os dados:', e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getData();
+  }, []);
+
+
+  if (isLoading) {
+    return (
+      <ThemedView style={styles.container}>
+        <ActivityIndicator size="large" color="#00A86B"  />
+      </ThemedView>
+    );
+  }
+
   return (
     <View style={styles.container} >
 
@@ -61,19 +98,29 @@ export default function HomeScreen() {
          showsUserLocation={true}
          showsMyLocationButton={true}
          showsCompass={true}
-       />
+        >
+
+          {images.length > 0 ? (
+            images.map((item, index) => (
+              <Marker
+                key={index}
+                coordinate={{
+                  latitude: item.latitude,
+                  longitude: item.longitude,
+                }}
+                onPress={() => router.push(`/modal?id=${item.id}`)}
+              >
+                <Image 
+                  source={{ uri: `data:image/jpeg;base64,${item.imageBytes}` }}
+                  style={styles.imageMarker}
+                />
+              </Marker>
+            ))
+          ) : (
+            <ThemedText>Nenhum dado encontrado</ThemedText>
+          )}
+        </MapView>
       )}
-     
-      
-        {/* <View style={styles.footer}>
-          <TouchableOpacity style={styles.button} activeOpacity={0.7} onPress={() => navigation.navigate('camera')} >
-            <Image 
-              style={styles.image}
-              source={CameraLogo} 
-            />
-          </TouchableOpacity>
-        </View> */}
-        
     </View>
   );
 }
@@ -127,4 +174,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'white',
   },
+  imageMarker: {
+    width: RFValue(50),
+    height: RFValue(50),
+    resizeMode: 'contain',
+    borderRadius: 30,
+    borderColor: '#00A86B',
+    borderWidth: 3,
+  }
 });

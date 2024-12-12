@@ -5,6 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
+import { RootSiblingParent } from 'react-native-root-siblings';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 
@@ -32,16 +33,18 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', headerShown: false }} />
-        <Stack.Screen name="loading" options={{ presentation: 'fullScreenModal', headerShown: false }} />
-        <Stack.Screen name="success" options={{ presentation: 'fullScreenModal', headerShown: false }} />
-        <Stack.Screen name="error" options={{ presentation: 'fullScreenModal', headerShown: false }} />
-      </Stack>
-      <StatusBar style="auto" />
+      <RootSiblingParent>
+        <Stack>
+          {/* <Stack.Screen name="index" options={{ headerShown: false }} /> */}
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="+not-found" />
+          <Stack.Screen name="modal" options={{ presentation: 'modal', headerShown: false }} />
+          <Stack.Screen name="loading" options={{ presentation: 'fullScreenModal', headerShown: false }} />
+          <Stack.Screen name="success" options={{ presentation: 'fullScreenModal', headerShown: false }} />
+          <Stack.Screen name="error" options={{ presentation: 'fullScreenModal', headerShown: false }} />
+        </Stack>
+        <StatusBar style="auto" />
+      </RootSiblingParent>
     </ThemeProvider>
   );
 }

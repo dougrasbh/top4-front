@@ -2,15 +2,17 @@ import { StyleSheet } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 
 export default function SuccessScreen() {
+
+  const { id } = useLocalSearchParams();
 
   const router = useRouter();
 
   setTimeout(() => {
     router.dismissAll();
-    router.push('/');
+    router.push(`/modal?id=${id}`);
   }, 2000)
 
   return(
