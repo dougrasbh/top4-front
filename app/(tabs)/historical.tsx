@@ -21,8 +21,9 @@ export default function Historical() {
 
   const getData = async () => {
     try {
-      const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/Prediction/Get/1`)
-      setImages(response.data)
+      const id = await AsyncStorage.getItem('id');
+      const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/Prediction/Get/${id}`);
+      setImages(response.data);
     } catch (e) {
       console.error('Erro ao ler os dados:', e);
     } finally {

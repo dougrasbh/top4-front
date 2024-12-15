@@ -9,13 +9,13 @@ import {
   watchPositionAsync,
   LocationAccuracy
  } from 'expo-location';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import img from '../../assets/images/bryophta-example.png'
 import { useRouter } from 'expo-router';
 import axios from 'axios';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function HomeScreen() {
 
@@ -48,19 +48,11 @@ export default function HomeScreen() {
 
   const [images, setImages] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    getData();
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 2000);
-  }, []);
-
+ 
   const getData = async () => {
     try {
-      const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/Prediction/Get/1`)
+      const id = await AsyncStorage.getItem('id');
+      const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/Prediction/Get/${id}`)
       setImages(response.data)
     } catch (e) {
       console.error('Erro ao ler os dados:', e);

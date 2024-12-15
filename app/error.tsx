@@ -13,28 +13,25 @@ export default function ErrorScreen() {
   const color = (Colors[colorScheme ?? 'light'].background)
   
   return(
-    <>
     <SafeAreaView style={{flex: 1, backgroundColor: color }}>
-    <ThemedView style={styles.close}>
-      <TouchableOpacity onPress={() => {
-        router.back();
-        router.dismissAll();
-        router.push('/camera')
-      }}>
-        <AntDesign name="closecircle" size={60} color="#00A86B" /> 
-      </TouchableOpacity>
-    </ThemedView>
-    <ThemedView style={styles.container}>
-      <ThemedText style={styles.text} type="title" >
-        Erro!
-      </ThemedText>
-      <ThemedText style={styles.text}>
-        Não foi possível identificar a briófita.{`\n`}
-        Tente novamente.
-      </ThemedText>
-    </ThemedView>
+      <ThemedView style={styles.close}>
+        <TouchableOpacity onPress={() => {
+          router.dismissAll();
+          router.push('/camera')
+        }}>
+          <AntDesign name="closecircle" size={60} color="#00A86B" /> 
+        </TouchableOpacity>
+      </ThemedView>
+      <ThemedView style={styles.container}>
+        <ThemedText style={styles.text} type="title" >
+          Erro!
+        </ThemedText>
+        <ThemedText style={styles.text}>
+          Não foi possível identificar a briófita.{`\n`}
+          Tente novamente.
+        </ThemedText>
+      </ThemedView>
     </SafeAreaView>
-    </>
   )
 }
 

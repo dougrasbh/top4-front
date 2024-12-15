@@ -64,10 +64,10 @@ export default function VisualizeBryophta() {
   return(
     <ThemedView style={styles.container}>
       <ThemedText 
-          type="defaultSemiBold" 
-          numberOfLines={3}
-          ellipsizeMode="tail"  
-          style={styles.bryophtaName} 
+        type="defaultSemiBold" 
+        numberOfLines={3}
+        ellipsizeMode="tail"  
+        style={styles.bryophtaName} 
         >
           {data?.category == 3 ? "Musgo" : data?.category == 2 ? "Hepática" : "Antócero"}
         </ThemedText>
@@ -101,7 +101,7 @@ export default function VisualizeBryophta() {
        </ThemedView>
       </ThemedView>
 
-      <TouchableOpacity activeOpacity={0.7} onPress={() => {}}>
+      <TouchableOpacity activeOpacity={0.7}>
         <Link href={'../'}>
           <AntDesign name="closecircle" size={60} color="#00A86B" /> 
         </Link>

@@ -7,7 +7,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 export default function SuccessScreen() {
 
   const { id } = useLocalSearchParams();
-
   const router = useRouter();
 
   setTimeout(() => {
