@@ -9,6 +9,7 @@ import axios from 'axios';
 import Foundation from '@expo/vector-icons/Foundation';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { getCurrentPositionAsync, LocationAccuracy, LocationObject, requestForegroundPermissionsAsync, watchPositionAsync } from 'expo-location';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function CameraPage() {
 
@@ -87,11 +88,13 @@ export default function CameraPage() {
       });
   
       router.navigate('/loading');
+
+      const id = await AsyncStorage.getItem('id')
   
       await axios
         .post(`${process.env.EXPO_PUBLIC_API_URL}/Prediction/RequestPrediction`, {
           imageBytesInBase64: byteArray,
-          userId: 1,
+          userId: id,
           latitude: location?.coords.latitude,
           longitude: location?.coords.longitude,
         })

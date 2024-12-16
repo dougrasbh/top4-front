@@ -6,6 +6,7 @@ import { ThemedText } from '@/components/ThemedText';
 import axios from 'axios';
 import { ThemedView } from '@/components/ThemedView';
 import { PointsCards } from '@/components/PointsCards';
+import { RFValue } from 'react-native-responsive-fontsize';
 
 export default function Points() {
   const [images, setImages] = useState<any[]>([]);
@@ -60,7 +61,9 @@ export default function Points() {
             />
           ))
         ) : (
-          <ThemedText>Nenhum dado encontrado</ThemedText>
+          <View style={styles.loadingContainer}>
+            <ThemedText style={{marginTop: RFValue(10)}}>Nenhum dado encontrado</ThemedText>
+          </View>
         )}
       </ThemedView>
     </ScrollView>

@@ -1,8 +1,8 @@
-import { Alert, Image, SafeAreaView, StyleSheet, TextInput, TouchableOpacity, useColorScheme } from "react-native";
+import { Alert, Image, Keyboard, SafeAreaView, StyleSheet, TextInput, TouchableOpacity, useColorScheme } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RFValue } from "react-native-responsive-fontsize";
 import { Colors } from "@/constants/Colors";
 import IconEmailWhite from "../assets/images/envelope.png"
@@ -33,7 +33,10 @@ export default function LoginScreen() {
     .then(async(response) => {
       await AsyncStorage.setItem('id', JSON.stringify(response.data.id))
         .then(() => {
-          router.push('/(tabs)')
+          router.push('/(tabs)');
+          setEmail('');
+          setPassword('');
+          Keyboard.dismiss();
         })
     }).catch((error) => {
       if (error.status === 404) {

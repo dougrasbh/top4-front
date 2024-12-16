@@ -10,14 +10,14 @@ export default function SuccessScreen() {
   const router = useRouter();
 
   setTimeout(() => {
-    router.dismissAll();
+    router.dismiss(2);
     router.push(`/modal?id=${id}`);
-  }, 2000)
+  }, 2000);
 
   return(
     <ThemedView style={styles.container}>
       <AntDesign name="checkcircle" size={40} color="#00A86B" />
-      <ThemedText style={styles.text} >
+      <ThemedText style={styles.text}>
         Sucesso!
       </ThemedText>
     </ThemedView>

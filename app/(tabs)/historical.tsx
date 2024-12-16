@@ -1,10 +1,11 @@
 import { HistoricalCard } from '@/components/HistoricalCard';
-import { StyleSheet, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
+import { StyleSheet, ScrollView, ActivityIndicator, RefreshControl, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCallback, useEffect, useState } from 'react';
 import { ThemedText } from '@/components/ThemedText';
 import axios from 'axios';
 import { ThemedView } from '@/components/ThemedView';
+import { RFValue } from 'react-native-responsive-fontsize';
 
 export default function Historical() {
   const [images, setImages] = useState<any[]>([]);
@@ -59,7 +60,9 @@ export default function Historical() {
           />
         ))
       ) : (
-        <ThemedText>Nenhum dado encontrado</ThemedText>
+        <View style={styles.loadingContainer}>
+          <ThemedText style={{marginTop: RFValue(10)}}>Nenhum dado encontrado</ThemedText>
+        </View>
       )}
     </ScrollView>
   );

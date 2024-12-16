@@ -1,4 +1,4 @@
-import { StyleSheet, View, Image, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Image, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { RFValue } from "react-native-responsive-fontsize"
 
 import MapView, { Marker } from 'react-native-maps';
@@ -9,13 +9,20 @@ import {
   watchPositionAsync,
   LocationAccuracy
  } from 'expo-location';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useRouter } from 'expo-router';
 import axios from 'axios';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import { useColorScheme } from '@/hooks/useColorScheme.web';
+import { Colors } from '@/constants/Colors';
+import Entypo from '@expo/vector-icons/Entypo';
+import Feather from '@expo/vector-icons/Feather';
+
+import { useFocusEffect } from 'expo-router';
 
 export default function HomeScreen() {
 
@@ -45,14 +52,14 @@ export default function HomeScreen() {
   }, [])
 
   const router = useRouter();
+  const colorScheme = useColorScheme();
 
   const [images, setImages] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
  
   const getData = async () => {
     try {
-      const id = await AsyncStorage.getItem('id');
-      const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/Prediction/Get/${id}`)
+      const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/Prediction/Get/All`)
       setImages(response.data)
     } catch (e) {
       console.error('Erro ao ler os dados:', e);
@@ -74,6 +81,18 @@ export default function HomeScreen() {
     );
   }
 
+  const color = Colors[colorScheme ?? 'light'].tint
+
+  const logOut = async() => {
+    await AsyncStorage.removeItem('id');
+    router.dismissAll();
+  }
+
+  const refresh = async() => {
+    await getData().then(() => setIsLoading(true));
+    setIsLoading(false);
+  }
+
   return (
     <View style={styles.container} >
 
@@ -92,6 +111,43 @@ export default function HomeScreen() {
          showsCompass={true}
         >
 
+          <ThemedView style={{
+            position: 'absolute',
+            alignItems: 'center',  
+            top: RFValue(60),
+            left: RFValue(20),
+            height: RFValue(45),
+            backgroundColor: Colors[colorScheme ?? 'light'].background,
+            borderRadius: RFValue(30),
+            width: RFValue(275),
+            elevation: 5,
+            flexDirection: 'row',
+            justifyContent: 'space-around',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 3 },
+            shadowOpacity: 0.3,
+            shadowRadius: 5,  
+
+          }}>
+            <ThemedView style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+              <Entypo name="leaf" size={24} color={color} style={{marginRight: 10}} />
+              <ThemedText
+                style={{
+                  color: color,
+                  fontFamily: 'Poppins_600SemiBold',
+                  fontSize: RFValue(16),
+                }}
+                >Bem-vindo (a)!</ThemedText>
+            </ThemedView>
+            <ThemedView style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+              <TouchableOpacity onPress={refresh} style={{marginRight: 15}} >
+                <Feather name="refresh-cw" size={24} color={color} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={logOut} >
+                <AntDesign name="logout" size={24} color={color} />
+              </TouchableOpacity>
+            </ThemedView>
+          </ThemedView>
           {images.length > 0 ? (
             images.map((item, index) => (
               <Marker
